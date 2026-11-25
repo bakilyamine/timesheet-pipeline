@@ -1,7 +1,7 @@
 # Timesheet Pipeline API
 
-Application FastAPI et pipeline ETL pour nettoyer les saisies de temps,
-calculer les couts charges et produire des syntheses par projet et collaborateur.
+A FastAPI application and ETL pipeline for cleaning timesheet entries,
+calculating loaded costs, and generating summaries by project and employee.
 
 ## Installation
 
@@ -11,22 +11,22 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Utilisation locale
+## Run locally
 
 ```bash
 python -m src.pipeline
 uvicorn src.api:app --reload --port 8000
 ```
 
-Endpoints disponibles :
+Available endpoints:
 
 - `GET /health`
 - `POST /pipeline/run`
 - `GET /rapports/projets`
 - `GET /rapports/collaborateurs`
-- Documentation interactive : `http://localhost:8000/docs`
+- Interactive API documentation: `http://localhost:8000/docs`
 
-## Qualite et tests
+## Code quality and tests
 
 ```bash
 ruff check .
@@ -42,15 +42,27 @@ docker run --rm -p 8000:8000 timesheet-pipeline-api
 
 ## CI/CD
 
-Le workflow [.github/workflows/ci-cd.yml](.github/workflows/ci-cd.yml) :
+The workflow in [.github/workflows/ci-cd.yml](.github/workflows/ci-cd.yml):
 
-1. installe Python 3.12 ;
-2. execute Ruff ;
-3. execute pytest ;
-4. execute le pipeline ;
-5. publie les CSV comme artefact ;
-6. construit l'image Docker ;
-7. sur un push vers `main`, publie l'image sur Docker Hub.
+1. installs Python 3.12;
+2. runs Ruff;
+3. runs pytest;
+4. executes the pipeline;
+5. uploads the generated CSV files as an artifact;
+6. builds the Docker image;
+7. publishes the image to Docker Hub on pushes to `main`.
 
-Ajouter dans GitHub Actions les secrets `DOCKERHUB_USERNAME` et
-`DOCKERHUB_TOKEN` pour activer la publication.
+Add the `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` secrets in GitHub Actions to
+enable image publishing.
+
+## Planning documents
+
+The following documents describe a proposal to review before extending the
+application:
+
+- [PRD.md](PRD.md) — product requirements, scope, and acceptance criteria;
+- [ARCHITECTURE.md](ARCHITECTURE.md) — system design, data model, and technology
+  choices;
+- [TESTING.md](TESTING.md) — testing strategy;
+- [DEVOPS.md](DEVOPS.md) — environments, CI/CD, and operations;
+- [ROADMAP.md](ROADMAP.md) — phases, dependencies, and completion criteria.

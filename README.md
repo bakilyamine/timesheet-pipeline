@@ -95,10 +95,12 @@ The workflow in [.github/workflows/ci-cd.yml](.github/workflows/ci-cd.yml):
 4. executes the pipeline;
 5. uploads the generated CSV files as an artifact;
 6. builds the Docker image;
-7. publishes the image to Docker Hub on pushes to `main`.
+7. publishes the image to Docker Hub on pushes to `main` when Docker Hub
+   credentials are configured.
 
 Add the `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` secrets in GitHub Actions to
-enable image publishing.
+enable image publishing. Without these optional secrets, linting, tests, CSV
+generation, and the Docker build still run; only image publishing is skipped.
 
 ## Planning documents
 

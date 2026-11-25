@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}{{ report_title }} — Timesheet Pipeline{% endblock %}
+
+{% block content %}
+  <section class="page-heading">
+    <div>
+      <p class="eyebrow">REPORTS</p>
+      <h1>{{ report_title }}</h1>
+      <p class="page-subtitle">{{ report_description }}</p>
+    </div>
+    <a class="button button-primary" href="{{ download_url }}">
+      <span aria-hidden="true">↓</span>
+      Download CSV
+    </a>
+  </section>
+
+  <section class="panel report-panel">
+    <div class="report-toolbar">
+      <div class="table-search">
+        <span aria-hidden="true">⌕</span>
+        <label class="sr-only" for="table-search">Search this report</label>
+        <input id="table-search" type="search" placeholder="Search..." data-table-search>
+      </div>
+      <span class="result-count">{{ rows|length }} result(s)</span>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">{% if report_type == "projects" %}Project{% else %}Employee{% endif %}</th>
+            <th scope="col" class="numeric">Hours</th>
+            <th scope="col" class="numeric">Base cost</th>
+            <th scope="col" class="numeric">Loaded cost</th>
+          </tr>
+        </thead>
+        <tbody data-searchable-rows>
+          {% for row in rows %}
+            <tr>
+              <td class="primary-cell">
+                <span class="table-avatar {% if report_type == 'projects' %}avatar-project{% endif %}">
+                  {% if report_type == "projects" %}{{ row.projet[:1]|upper }}{% else %}{{ row.collaborateur[:1]|upper }}{% endif %}
+                </span>
+                {% if report_type == "projects" %}{{ row.projet }}{% else %}{{ row.collaborateur }}{% endif %}
+              </td>
+              <td class="numeric">{{ format_number(row.heures) }} h</td>
+              <td class="numeric">{{ format_number(row.cout_ht) }}</td>
+              <td class="numeric cost-cell">{{ format_number(row.cout_charge) }}</td>
+            </tr>
+          {% else %}
+            <tr>
+              <td class="empty-table" colspan="4">There is no valid data for this report.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="table-note">Amounts are shown without a configured currency. Loaded cost uses the current 15% uplift.</p>
+  </section>
+{% endblock %}

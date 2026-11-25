@@ -1,0 +1,29 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Start timesheet frontend",
+			"type": "shell",
+			"command": "/usr/local/python/3.14.2/bin/python",
+			"args": [
+				"-m",
+				"uvicorn",
+				"src.api:app",
+				"--host",
+				"127.0.0.1",
+				"--port",
+				"8000",
+				"--reload"
+			],
+			"options": {
+				"env": {
+					"APP_ENV": "development",
+					"DEV_AUTH_ENABLED": "true",
+					"PORT": "8000"
+				}
+			},
+			"isBackground": true,
+			"problemMatcher": []
+		}
+	]
+}

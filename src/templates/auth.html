@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f5f6f8">
+    <title>{{ title }} — Timesheet Pipeline</title>
+    <link rel="stylesheet" href="/static/app.css?v=2">
+  </head>
+  <body class="auth-page">
+    <main class="auth-card">
+      <a class="brand auth-brand" href="/">
+        <span class="brand-mark">T</span>
+        <span class="brand-copy">
+          <strong>timesheet</strong>
+          <span>PIPELINE</span>
+        </span>
+      </a>
+      <p class="eyebrow">ORGANIZATION SIGN-IN</p>
+      <h1>{{ title }}</h1>
+      <p class="auth-message">{{ message }}</p>
+
+      {% if missing_settings %}
+        <div class="config-list">
+          <strong>Configuration required:</strong>
+          <ul>
+            {% for setting in missing_settings %}
+              <li><code>{{ setting }}</code></li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+
+      {% if dev_auth_enabled and status_code == 503 %}
+        <div class="notice notice-warning">
+          <span class="notice-icon" aria-hidden="true">!</span>
+          <p>Development-only demo access is enabled. This does not sign you in with your organization.</p>
+        </div>
+        <a class="button button-primary auth-button" href="/auth/dev-login">Continue in local demo mode</a>
+      {% elif status_code == 403 %}
+        <a class="button button-secondary auth-button" href="/auth/logout">Sign out</a>
+      {% elif status_code == 503 %}
+        <p class="auth-help">No client secrets are displayed here. Configure them through the server environment or an approved secrets manager.</p>
+      {% else %}
+        <a class="button button-primary auth-button" href="/auth/login">Continue with organization SSO</a>
+      {% endif %}
+
+      <p class="auth-footer">Access is managed by your organization.</p>
+    </main>
+  </body>
+</html>

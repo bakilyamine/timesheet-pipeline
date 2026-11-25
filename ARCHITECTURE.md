@@ -1,6 +1,6 @@
 # Architecture — Timesheet Pipeline
 
-**Statut : proposition à valider — aucune implémentation autorisée.**
+**Statut : architecture approuvée; interface initiale en cours d'implémentation.**
 
 ## 1. Contraintes et faits
 
@@ -56,11 +56,11 @@ ou les besoins de reprise le justifient.
 
 | Domaine | Choix recommandé | Justification | Alternatives et compromis |
 |---|---|---|---|
-| Frontend | Jinja2 + HTMX, servi par FastAPI | Interface simple sans application SPA ni chaîne Node séparée; adapté aux formulaires et tableaux de gestion. | React/Vue donnent plus d'interactivité mais ajoutent deux builds, dépendances et contrats front/back. |
+| Frontend | Jinja2 et ressources locales, servis par FastAPI | Interface simple sans application SPA ni chaîne Node séparée; aucune dépendance de navigateur tierce à charger. | HTMX pourra être ajouté si les interactions asynchrones le justifient; React/Vue ajoutent deux builds, dépendances et contrats front/back. |
 | Backend | FastAPI (existant) | API typée, validation, OpenAPI; réutilise le service actuel. | Django fournit un ORM/admin intégré mais implique une migration de framework; Flask est plus minimal mais demande davantage de composants. |
 | Données | PostgreSQL | Transactions, contraintes, concurrence et sauvegardes adaptées aux corrections multi-utilisateurs. | SQLite est simple pour une démo mono-utilisateur, mais moins adapté à l'usage concurrent; fichiers CSV ne garantissent pas la cohérence. |
 | ORM/migrations | SQLAlchemy 2 + Alembic | Modèle explicite et migrations reproductibles. | SQL direct réduit une couche mais rend les migrations et le mapping plus manuels. |
-| SSO | OIDC avec l'IdP organisationnel existant | Évite les comptes et mots de passe gérés localement; le fournisseur n'est pas encore connu. | SAML peut être nécessaire selon l'IdP; proxy d'authentification uniquement si l'organisation le standardise et sécurise ses en-têtes. |
+| SSO | OIDC générique avec l'IdP organisationnel existant | Évite les comptes et mots de passe gérés localement; les valeurs du fournisseur et des groupes sont injectées par configuration. | SAML peut être nécessaire selon l'IdP; proxy d'authentification uniquement si l'organisation le standardise et sécurise ses en-têtes. |
 | Traitement | pandas pour les imports/agrégations où nécessaire | Déjà présent et approprié aux fichiers batch de taille modérée. | SQL pour agrégations persistées réduit la mémoire; choix à mesurer avec la volumétrie réelle. |
 | Déploiement | Conteneurs Docker sur serveur interne, sous réserve de confirmer « local » | Réutilise le Dockerfile et évite de choisir un cloud externe sans besoin exprimé. | Kubernetes est disproportionné pour le MVP; cloud managé peut simplifier DB/HA mais requiert une décision de résidence et de réseau. |
 
@@ -154,8 +154,13 @@ n'en ont pas besoin. Les erreurs suivent un format stable, par exemple
   `audience`, `state`, `nonce`, signature et expiration des jetons.
 - Autoriser côté serveur chaque opération et chaque ligne; masquer les
   contrôles d'interface ne suffit pas.
-- Cookies de session `Secure`, `HttpOnly`, `SameSite` approprié, protection
-  CSRF sur les opérations mutatives et expiration/révocation documentées.
+- Cookies de session `Secure` en production, `HttpOnly`, `SameSite=Lax`; les
+  méthodes mutatives vérifient l'en-tête `Origin`.
+- L'application refuse les routes métier tant que l'issuer, le client OIDC et
+  les groupes ne sont pas configurés; seule la sonde de santé reste publique.
+- Le tableau de bord global de coûts est actuellement réservé au rôle Finance.
+  Les rôles employé et manager restent bloqués tant que les vues à portée
+  individuelle/équipe ne sont pas implémentées.
 - Valider types, taille, encodage, colonnes et valeurs du CSV; protéger les
   téléchargements CSV contre l'injection de formules dans les tableurs.
 - Ne pas journaliser tokens, cookies, CSV bruts, taux ou données personnelles
@@ -197,8 +202,9 @@ tests/
   e2e/
 ```
 
-Cette structure est une proposition à faire évoluer au plus simple; ne pas
-créer les sous-packages avant approbation et besoin d'implémentation.
+Cette structure est une cible à faire évoluer au plus simple. L'interface
+initiale utilise des templates Jinja2 et du CSS/JavaScript local; les composants
+SSO, base de données et persistance ne sont pas encore implémentés.
 
 ## 8. Alternatives non retenues pour le MVP
 

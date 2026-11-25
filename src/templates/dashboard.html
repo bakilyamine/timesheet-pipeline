@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Overview — Timesheet Pipeline{% endblock %}
+
+{% block content %}
+  {% if run_succeeded %}
+    <div class="notice notice-success" role="status">
+      <span class="notice-icon" aria-hidden="true">✓</span>
+      <p>The pipeline completed successfully. Summary files have been updated.</p>
+    </div>
+  {% endif %}
+
+  <section class="dashboard-hero">
+    <div>
+      <p class="eyebrow">TIMESHEET ANALYTICS</p>
+      <h1>Overview</h1>
+      <p class="page-subtitle">A clear view of validated hours, project costs, and reporting data.</p>
+    </div>
+    <form action="/ui/pipeline/run" method="post">
+      <button class="button hero-button" type="submit">
+        <span aria-hidden="true">↻</span>
+        Refresh data
+      </button>
+    </form>
+  </section>
+
+  <section class="metrics-grid" aria-label="Key performance indicators">
+    <article class="metric-card">
+      <div class="metric-label">Validated hours <span class="metric-icon icon-blue">◷</span></div>
+      <div class="metric-value">{{ format_number(total_heures) }}<span class="metric-unit">h</span></div>
+      <div class="metric-caption">Across {{ lignes_valides }} accepted entries</div>
+    </article>
+    <article class="metric-card">
+      <div class="metric-label">Loaded costs <span class="metric-icon icon-violet">↗</span></div>
+      <div class="metric-value">{{ format_number(total_cout_charge) }}</div>
+      <div class="metric-caption">Includes the current 15% uplift</div>
+    </article>
+    <article class="metric-card">
+      <div class="metric-label">Active projects <span class="metric-icon icon-teal">▦</span></div>
+      <div class="metric-value">{{ nombre_projets }}</div>
+      <div class="metric-caption">With validated time entries</div>
+    </article>
+    <article class="metric-card">
+      <div class="metric-label">Contributors <span class="metric-icon icon-amber">◎</span></div>
+      <div class="metric-value">{{ nombre_collaborateurs }}</div>
+      <div class="metric-caption">With validated time entries</div>
+    </article>
+  </section>
+
+  <section class="content-grid">
+    <article class="panel project-panel">
+      <div class="panel-heading">
+        <div>
+          <p class="eyebrow">COST DISTRIBUTION</p>
+          <h2>Cost by project</h2>
+        </div>
+        <a class="text-link" href="/reports/projects">Full report <span aria-hidden="true">→</span></a>
+      </div>
+      {% if projets %}
+        <div class="project-list">
+          {% for projet in projets %}
+            <div class="project-row">
+              <div class="project-row-top">
+                <span class="project-name">{{ projet.projet }}</span>
+                <span class="project-cost">{{ format_number(projet.cout_charge) }}</span>
+              </div>
+              <div class="bar-track" role="img" aria-label="{{ projet.part }}% of total loaded cost">
+                <span class="bar-fill" style="width: {{ projet.part }}%"></span>
+              </div>
+              <div class="project-meta">
+                <span>{{ format_number(projet.heures) }} h</span>
+                <span>{{ projet.part }}% of total cost</span>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state">No validated entries yet. Run the pipeline to refresh the data.</div>
+      {% endif %}
+    </article>
+
+    <article class="panel data-quality-panel">
+      <div class="panel-heading">
+        <div>
+          <p class="eyebrow">DATA HEALTH</p>
+          <h2>Import quality</h2>
+        </div>
+        <span class="quality-badge">{{ qualite_donnees }}% valid</span>
+      </div>
+      <div class="quality-meter" role="img" aria-label="{{ qualite_donnees }} percent of imported entries are valid">
+        <span style="width: {{ qualite_donnees }}%"></span>
+      </div>
+      <div class="quality-breakdown">
+        <div>
+          <span class="quality-dot quality-dot-good" aria-hidden="true"></span>
+          <span>Accepted entries</span>
+          <strong>{{ lignes_valides }}</strong>
+        </div>
+        <div>
+          <span class="quality-dot quality-dot-muted" aria-hidden="true"></span>
+          <span>Excluded entries</span>
+          <strong>{{ lignes_exclues }}</strong>
+        </div>
+      </div>
+      <p class="quality-note">Entries with missing fields or non-positive hours and rates are excluded from reports.</p>
+      <a class="secondary-link" href="/docs">Open API documentation <span aria-hidden="true">↗</span></a>
+    </article>
+  </section>
+
+  <section class="panel quick-links">
+    <div>
+      <p class="eyebrow">REPORTING</p>
+      <h2>Explore your reports</h2>
+      <p class="page-subtitle">Review validated hours and loaded costs by project or contributor.</p>
+    </div>
+    <div class="quick-actions">
+      <a class="button button-secondary" href="/reports/projects">Project report <span aria-hidden="true">→</span></a>
+      <a class="button button-secondary" href="/reports/collaborators">Contributor report <span aria-hidden="true">→</span></a>
+    </div>
+  </section>
+{% endblock %}
